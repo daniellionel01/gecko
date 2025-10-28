@@ -2,3 +2,13 @@
 *.ez
 /build
 erl_crash.dump
+
+.env
+.env.docker
+*.sqlite*
+*.db*
+.DS_Store
+*.mp4
+*.m3u8
+*.webm
+*.mkv

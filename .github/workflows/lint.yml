@@ -1,0 +1,37 @@
+name: Linting
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  lint-sh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
+      - name: Lint
+        uses: azohra/shell-linter@latest
+
+  lint-dockerfile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@master
+        with:
+          dockerfile: "Dockerfile"
+
+  lint-sql:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: "actions/checkout@v4"
+      - uses: "actions/setup-python@v6"
+        with:
+          python-version: "3.8"
+      - name: Install SQLFluff
+        run: "pip install sqlfluff==3.3.1"
+      - name: Lint sql directory
+        run: "sqlfluff lint -v --dialect sqlite src/max/sql/"
