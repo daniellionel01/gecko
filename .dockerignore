@@ -1,0 +1,13 @@
+.git
+build
+_build
+dist
+node_modules
+*.log
+Dockerfile
+docker-compose*
+**/.DS_Store
+
+*.beam
+*.ez
+erl_crash.dump

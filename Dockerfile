@@ -10,7 +10,11 @@ ARG BUILD_BASE_VER
 RUN apk add --no-cache build-base=0.5-r3
 WORKDIR /app
 COPY --from=gleam /bin/gleam /bin/gleam
-COPY . .
+COPY gleam.toml .
+COPY src ./src
+COPY test ./test
+COPY priv ./priv
+COPY bin ./bin
 RUN gleam export erlang-shipment
 
 # Runtime stage
@@ -22,8 +26,8 @@ ARG BUILD_TIME
 
 ENV GIT_SHA=${GIT_SHA}
 ENV BUILD_TIME=${BUILD_TIME}
-COPY --from=build /app/priv/db /app/db
 COPY --from=build /app/build/erlang-shipment /app
+COPY --from=build /app/priv/db /app/db
 COPY --from=build /app/bin/pod-entrypoint.sh /app
 COPY --from=build /app/bin/healthcheck.sh /app
 RUN chmod +x /app/*.sh
