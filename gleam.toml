@@ -5,10 +5,11 @@ description = "🦎 audio transcription for any scale"
 
 licences = ["Apache-2.0"]
 repository = { type = "github", user = "daniellionel01", repo = "gecko" }
-links = [{ title = "Website", href = "" }]
 
 [dependencies]
 gleam_stdlib = ">= 0.44.0 and < 2.0.0"
+sqlight = ">= 1.0.3 and < 2.0.0"
+envoy = ">= 1.0.2 and < 2.0.0"
 
 [dev-dependencies]
 gleeunit = ">= 1.0.0 and < 2.0.0"

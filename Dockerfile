@@ -15,6 +15,7 @@ RUN gleam export erlang-shipment
 
 # Runtime stage
 FROM erlang:${ERLANG_VERSION}-alpine
+SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 
 ARG GIT_SHA
 ARG BUILD_TIME
@@ -25,7 +26,7 @@ COPY --from=build /app/priv/db /app/db
 COPY --from=build /app/build/erlang-shipment /app
 COPY --from=build /app/bin/pod-entrypoint.sh /app
 COPY --from=build /app/bin/healthcheck.sh /app
-RUN chmod +x /app/healthcheck.sh
+RUN chmod +x /app/*.sh
 RUN apk add --no-cache \
   ca-certificates=20250619-r0 \
   curl=8.14.1-r2 \
@@ -34,8 +35,7 @@ RUN apk add --no-cache \
   --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
   --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community \
   ffmpeg=8.0-r3
-RUN curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/download/v2.28.0/dbmate-linux-amd64 \
-  && chmod +x /usr/local/bin/dbmate
+RUN curl -fsSL https://raw.githubusercontent.com/pressly/goose/master/install.sh | sh -s v3.26.0
 WORKDIR /app
 ENTRYPOINT ["/app/pod-entrypoint.sh"]
 CMD ["run"]

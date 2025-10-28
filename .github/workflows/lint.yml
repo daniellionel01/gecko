@@ -34,4 +34,4 @@ jobs:
       - name: Install SQLFluff
         run: "pip install sqlfluff==3.3.1"
       - name: Lint sql directory
-        run: "sqlfluff lint -v --dialect sqlite src/max/sql/"
+        run: "sqlfluff lint -v --dialect sqlite src/gecko/sql/"

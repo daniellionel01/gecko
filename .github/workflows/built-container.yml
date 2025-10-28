@@ -1,0 +1,27 @@
+name: Build container image
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build . --file Dockerfile --tag gecko
+
+      - name: Log in to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push image
+        run: |
+          IMAGE_ID=
+          docker tag gecko "ghcr.io/daniellionel01/gecko:latest"
+          docker push "ghcr.io/daniellionel01/gecko:latest"

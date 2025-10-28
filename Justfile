@@ -1,5 +1,7 @@
 set dotenv-load
 
+export GOOSE_MIGRATION_DIR := "./priv/db/migrations"
+
 default:
   @just --choose
 
@@ -21,11 +23,15 @@ run:
   just codegen
   gleam run
 
+pod:
+  podman build -t gecko .
+  podman run --rm --env-file .env.docker -p 3000:3000 gecko
+
 watch:
   watchexec \
     --restart --verbose --wrap-process=session --stop-signal SIGTERM \
     --exts gleam --debounce 500ms --watch src/ \
-    -- "just kill-ffmpeg && gleam run"
+    -- "gleam run"
 
 @loc:
   echo "SOURCE CODE"
@@ -33,3 +39,15 @@ watch:
 
 @tree:
   tree -I '*.woff2|build|deps|.rebar3|ebin|.eunit|logs|*.beam|*.dump|.git|cover|doc|*.plt|*.crashdump|rel|.DS_Store'
+
+@gen-secret-key:
+  openssl rand -base64 64 | tr -dc 'A-Za-z0-9' | head -c64; echo
+
+goose +args:
+  goose sqlite3 "${DATABASE_URL}" {{args}}
+
+seed:
+  sqlite3 "${DATABASE_URL}" < priv/db/seed.sql
+
+db-shell:
+  sqlite3 "${DATABASE_URL}"
