@@ -8,6 +8,7 @@
 
 - https://www.selfping.com/
 - https://healthchecks.io/
+- https://github.com/healthyhost/audit-vps-script
 
 ### monitoring
 
@@ -115,10 +116,6 @@ curl -fsS -m 10 --retry 5 -o /dev/null "$HEALTHCHECKS_URL"
 # crontab -e
 0 * * * * /home/user/backup_pg.sh >> /home/user/backup.log 2>&1
 ```
-
-### security
-
-https://github.com/healthyhost/audit-vps-script
 
 ### disk
 
