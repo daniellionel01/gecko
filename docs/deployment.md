@@ -36,17 +36,17 @@ systemctl start unattended-upgrades
 
 For additional security, we will create a dedicated user that is not root. This user will be able to run sudo commands:
 ```sh
-adduser max
-usermod -aG sudo max
+adduser gecko
+usermod -aG sudo gecko
 
-rsync -a ~/.ssh/ /home/max/.ssh/
-chown -R max:max /home/max/.ssh/
+rsync -a ~/.ssh/ /home/gecko/.ssh/
+chown -R gecko:gecko /home/gecko/.ssh/
 ```
 
 Make sure to keep your root ssh connection open while trying to login to the new user, in case something goes wrong.
 Since we disabled root login in the first step, you could lock yourself out:
 ```sh
-ssh max@<server_ip>
+ssh gecko@<server_ip>
 ```
 
 ## Useful Software
@@ -122,15 +122,15 @@ We will need a few things on our server before we instantiate it with podman. Na
 variable file and a service directory. The service directory stores the database and media files.
 
 We will create a directory in `/srv` (short for "service data"). It requires sudo privileges, but we
-want the user `max` to be able to operate in it:
+want the user `gecko` to be able to operate in it:
 ```sh
-sudo install -d -m 700 -o max -g max /srv/max
+sudo install -d -m 700 -o gecko -g gecko /var/lib/gecko
 ```
 
 Make sure to get and insert your `TMDB_API_KEY` from [https://www.themoviedb.org/documentation/api](https://www.themoviedb.org/documentation/api). Let's create the `.env` file:
 ```sh
-sudo tee /srv/max/.env >/dev/null <<EOF
-DATABASE_URL=sqlite:/data/max.db
+sudo tee /var/lib/gecko/.env >/dev/null <<EOF
+DATABASE_URL=sqlite:/data/gecko.db
 WEB_SECRET_KEY_BASE=$(openssl rand -hex 32)
 WEB_PORT=3000
 TMDB_API_KEY=...
@@ -140,19 +140,19 @@ EOF
 
 Create a systemd service:
 ```sh
-sudo tee /etc/containers/systemd/max.container >/dev/null <<'EOF'
+sudo tee /etc/containers/systemd/gecko.container >/dev/null <<'EOF'
 [Unit]
 Description=Self hosted media application
 After=local-fs.target
 
 [Container]
-Image=ghcr.io/daniellionel01/max:latest
+Image=ghcr.io/daniellionel01/gecko:latest
 AutoUpdate=registry
 PublishPort=3000:3000
 
-Volume=/srv/max:/data:rw,z
+Volume=/var/lib/gecko:/data:rw,z
 
-EnvironmentFile=/srv/max/.env
+EnvironmentFile=/var/lib/gecko/.env
 
 # Restart the service if the page no longer loads
 HealthCmd=sh -c /app/healthcheck.sh
@@ -175,12 +175,12 @@ EOF
 ## Starting the Service
 
 For the service to be accessible via https, all you need to do is point an `A` DNS record to the IP of your server.
-In this example: `max.kurz.net`.
+In this example: `gecko.kurz.net`.
 
 This will start the systemd service, which in turn manages a podman container instance:
 ```sh
 systemctl daemon-reload
-systemctl start max.service
+systemctl start gecko.service
 
 # verify the service is running
 $ curl -I localhost:3000/login
@@ -190,7 +190,7 @@ HTTP/1.1 200 OK
 Now for the reverse proxy:
 ```sh
 sudo tee /etc/caddy/Caddyfile >/dev/null <<'EOF'
-max.kurz.net {
+gecko.kurz.net {
   reverse_proxy localhost:3000
 }
 EOF
@@ -204,26 +204,26 @@ It will take a couple of minutes for the SSL certificate to be generated and the
 
 Our service should now be running and accessible through the internet. Since the database has just been created, we will manually create a user.
 
-There is a command we can run with the `max` package to give us a hash and salt for our password:
+There is a command we can run with the `gecko` package to give us a hash and salt for our password:
 ```sh
-sudo podman run --rm max run hash <password>
+sudo podman run --rm gecko run hash <password>
 ```
 
 Wow connect to the database and insert the user with the salt and hash from the previous command:
 ```sh
-sudo sqlite3 /srv/max/max.db
+sudo sqlite3 /var/lib/gecko/gecko.db
 sqlite> insert into user (username, salt, password_hash, admin) values ('admin', '...', '...', 0);
 ```
 
 ## CI/CD
 
-Every push to main builds and pushes to the github container registry under `ghcr.io/daniellionel01/max:latest`.
+Every push to main builds and pushes to the github container registry under `ghcr.io/daniellionel01/gecko:latest`.
 
 The systemd service is setup with `AutoUpdate=registry` which will pull the updated image every 60 minutes.
 
 If you want to force refresh systemd with the new image, you can do the following:
 
 ```sh
-sudo podman pull ghcr.io/daniellionel01/max:latest
-sudo systemctl restart max.service
+sudo podman pull ghcr.io/daniellionel01/gecko:latest
+sudo systemctl restart gecko.service
 ```

@@ -2,7 +2,7 @@
 
 *Admission: I develop on macos, I have no idea if or how this runs on windows.*
 
-## Software
+## Required Software
 
 To run this software on your local machine you need the following software installed:
 - https://gleam.run
@@ -13,6 +13,11 @@ Technically optional, but used in this project:
 - https://github.com/casey/just
 - https://github.com/wagoodman/dive
 - https://podman.io
+
+Linters used in CI/CD
+- Dockerfiles: https://github.com/hadolint/hadolint
+- SQL files: https://github.com/sqlfluff/sqlfluff
+- Bash Scripts: https://github.com/koalaman/shellcheck
 
 ## Environment Variables
 
@@ -77,10 +82,6 @@ CI=true dive podman://gecko
 
 ## Linting
 
-- Dockerfiles: https://github.com/hadolint/hadolint
-- SQL files: https://github.com/sqlfluff/sqlfluff
-- Bash Scripts: https://github.com/koalaman/shellcheck
-
 ## Version Audits
 
 This is how you can open a shell session to explore the alpine base (f.e. for package versions)
@@ -91,3 +92,7 @@ podman run --rm -it erlang:28.0.2.0-alpine sh
 apk version ffmpeg
 apk info ffmpeg
 ```
+
+## Database Migrations
+
+## CI/CD
