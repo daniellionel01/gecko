@@ -12,7 +12,6 @@ jobs:
       contents: read
 
     env:
-      DATABASE_URL: $RUNNER_TEMP/db_ci.sqlite
       GOOSE_MIGRATION_DIR: ./priv/db/migrations
 
     steps:
@@ -34,10 +33,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y sqlite3
 
+      - name: Configure database path
+        run: echo "DATABASE_URL=$RUNNER_TEMP/db_ci.sqlite" >> "$GITHUB_ENV"
+
       - name: Show tool versions
         run: |
-          goose -v
-          sqlite3 -version
+          goose --version
+          sqlite3 --version
 
       - name: Run migrations (up)
         run: |
