@@ -12,7 +12,7 @@ jobs:
       contents: read
 
     env:
-      DATABASE_URL: ${{ runner.temp }}/db_ci.sqlite
+      DATABASE_URL: $RUNNER_TEMP/db_ci.sqlite
       GOOSE_MIGRATION_DIR: ./priv/db/migrations
 
     steps:
