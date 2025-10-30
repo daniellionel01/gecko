@@ -1,0 +1,77 @@
+name: Verify DB migrations & seed
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify-db:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    env:
+      DATABASE_URL: ${{ runner.temp }}/db_ci.sqlite
+      GOOSE_MIGRATION_DIR: ./priv/db/migrations
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "^1.22"
+
+      - name: Install goose
+        run: |
+          go install github.com/pressly/goose/v3/cmd/goose@latest
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Install sqlite3 CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sqlite3
+
+      - name: Show tool versions
+        run: |
+          goose -v
+          sqlite3 -version
+
+      - name: Run migrations (up)
+        run: |
+          goose -dir "$GOOSE_MIGRATION_DIR" sqlite3 "$DATABASE_URL" status
+          goose -dir "$GOOSE_MIGRATION_DIR" sqlite3 "$DATABASE_URL" up
+          goose -dir "$GOOSE_MIGRATION_DIR" sqlite3 "$DATABASE_URL" status
+
+      - name: Verify tables were created
+        shell: bash
+        run: |
+          tables="$(sqlite3 "$DATABASE_URL" ".tables")"
+          if [ -z "$tables" ]; then
+            echo "❌ No tables found after migrations."
+            exit 1
+          fi
+          echo "✅ Tables created:"
+          echo "$tables"
+
+      - name: Seed database
+        run: |
+          test -f priv/db/seed.sql
+          sqlite3 "$DATABASE_URL" < priv/db/seed.sql
+
+      - name: Integrity check
+        shell: bash
+        run: |
+          result="$(sqlite3 "$DATABASE_URL" 'PRAGMA integrity_check;')"
+          if [ "$result" != "ok" ]; then
+            echo "❌ Integrity check failed:"
+            echo "$result"
+            exit 1
+          fi
+          echo "✅ PRAGMA integrity_check passed."
+
+      - name: Smoke query
+        run: |
+          sqlite3 "$DATABASE_URL" "SELECT 1;"

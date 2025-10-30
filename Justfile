@@ -51,3 +51,9 @@ seed:
 
 db-shell:
   sqlite3 "${DATABASE_URL}"
+
+@deps-ls:
+  gleam deps list | column -t
+
+repomix:
+  bunx repomix --include "src/**/*.gleam,**/*.sh,**/*.yml,Justfile" --style xml -o REPO.xml

@@ -1,5 +1,10 @@
 # notes
 
+## aspects
+
+- (web) analytics
+- dashboarding
+
 ## audio separation
 
 - https://asteroid-team.github.io/
