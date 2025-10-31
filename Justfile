@@ -61,4 +61,9 @@ db-shell:
   gleam deps list | column -t
 
 repomix:
-  bunx repomix --include "src/**/*.gleam,**/*.sh,**/*.yml,Justfile" --style xml -o REPO.xml
+  podman run --rm -it \
+    -v "$PWD:/app" \
+    -w /app \
+    ghcr.io/yamadashy/repomix \
+    --include "src/**/*.gleam,**/*.sh,**/*.yml,Justfile" \
+    --style xml -o REPO.xml
