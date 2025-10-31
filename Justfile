@@ -60,10 +60,18 @@ db-shell:
 @deps-ls:
   gleam deps list | column -t
 
-repomix:
+repomix-all:
   podman run --rm -it \
     -v "$PWD:/app" \
     -w /app \
     ghcr.io/yamadashy/repomix \
     --include "src/**/*.gleam,**/*.sh,**/*.yml,Justfile" \
+    --style xml -o REPO.xml
+
+repomix-gleam:
+  podman run --rm -it \
+    -v "$PWD:/app" \
+    -w /app \
+    ghcr.io/yamadashy/repomix \
+    --include "src/**/*.gleam" \
     --style xml -o REPO.xml
