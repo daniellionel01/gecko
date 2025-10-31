@@ -2,6 +2,8 @@ set dotenv-load
 
 export GOOSE_MIGRATION_DIR := "./priv/db/migrations"
 
+# === command runners ===
+
 default:
   @just --choose
 
@@ -14,10 +16,15 @@ test:
 codegen:
   gleam run -m parrot
 
+# === command runners ===
+
 lint:
-  podman run --rm -i docker.io/hadolint/hadolint < Dockerfile
-  uvx sqlfluff lint src/gecko/sql/ --dialect sqlite
-  shellcheck bin/*.sh
+  # podman run --rm -i docker.io/hadolint/hadolint < Dockerfile
+  podman run --rm -t -v $PWD:/sql sqlfluff/sqlfluff:latest lint \
+    --dialect sqlite \
+    /sql/src/gecko/sql \
+    /sql/priv/db
+  # shellcheck bin/*.sh
 
 run:
   just codegen
